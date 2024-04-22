@@ -98,7 +98,10 @@ class COCOSegmentation(Dataset):
                 _target = np.ones([height, width], dtype=bool)
 
         # Read Image
-        _img = np.array(Image.open(image_path).convert('RGB')).astype(np.float32)
+        try:
+            _img = np.array(Image.open(image_path).convert('RGB')).astype(np.float32)
+        except:
+            return None, None
 
         return _img, _target
 

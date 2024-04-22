@@ -4,3 +4,5 @@ opencv-contrib-python-headless
 pillow
 torch
 torchvision
+tensorboardX
+pycocotools

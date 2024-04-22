@@ -6,12 +6,12 @@ class Path(object):
         elif database == 'sbd':
             return '/path/to/Segmentation/benchmark_RELEASE'  # folder that contains dataset/.
         elif database == 'coco':
-            return '/path/to/coco'  # folder that contains annotations/.
+            return '/Users/hope/Downloads/'  # folder that contains annotations/.
         else:
             print('Database {} not available.'.format(database))
             raise NotImplementedError
 
     @staticmethod
     def models_dir():
-        return '/path/to/Models/'
+        return '/Users/hope/Desktop/sheku-invades/DeepGrabCut-PyTorch/models/'
 

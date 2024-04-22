@@ -38,8 +38,10 @@ class ScaleNRotate(object):
                 continue
 
             tmp = sample[elem]
-
-            h, w = tmp.shape[:2]
+            try:
+                h, w = tmp.shape[:2]
+            except:
+                return
             center = (w / 2, h / 2)
             assert(center != 0)  # Strange behaviour warpAffine
             M = cv2.getRotationMatrix2D(center, rot, sc)
@@ -77,7 +79,10 @@ class FixedResize(object):
         if self.resolutions is None:
             return sample
 
-        elems = list(sample.keys())
+        try:
+            elems = list(sample.keys())
+        except:
+            return
 
         for elem in elems:
 
@@ -141,8 +146,11 @@ class DistanceMap(object):
         self.elem = elem
 
     def __call__(self, sample):
-        if sample[self.elem].ndim == 3:
-            raise ValueError('DistanceMap not implemented for multiple object per image.')
+        try:
+            if sample[self.elem].ndim == 3:
+                raise ValueError('DistanceMap not implemented for multiple object per image.')
+        except:
+            return
         _target = sample[self.elem]
         if np.max(_target) == 0:
             # TODO: if mask do no have any object, distance=255
@@ -162,8 +170,10 @@ class ConcatInputs(object):
         self.elems = elems
 
     def __call__(self, sample):
-
-        res = sample[self.elems[0]]
+        try:
+            res = sample[self.elems[0]]
+        except:
+            return
 
         for elem in self.elems[1:]:
             assert(sample[self.elems[0]].shape[:2] == sample[elem].shape[:2])
@@ -187,27 +197,29 @@ class ToTensor(object):
     """Convert ndarrays in sample to Tensors."""
 
     def __call__(self, sample):
+        try:
+            for elem in sample.keys():
+                if 'meta' in elem:
+                    continue
+                elif 'bbox' in elem:
+                    tmp = sample[elem]
+                    sample[elem] = torch.from_numpy(tmp)
+                    continue
 
-        for elem in sample.keys():
-            if 'meta' in elem:
-                continue
-            elif 'bbox' in elem:
-                tmp = sample[elem]
-                sample[elem] = torch.from_numpy(tmp)
-                continue
+                tmp = sample[elem].astype(np.float32)
 
-            tmp = sample[elem].astype(np.float32)
+                if tmp.ndim == 2:
+                    tmp = tmp[:, :, np.newaxis]
 
-            if tmp.ndim == 2:
-                tmp = tmp[:, :, np.newaxis]
+                # swap color axis because
+                # numpy image: H x W x C
+                # torch image: C X H X W
+                tmp = tmp.transpose((2, 0, 1))
+                sample[elem] = torch.from_numpy(tmp).float()
 
-            # swap color axis because
-            # numpy image: H x W x C
-            # torch image: C X H X W
-            tmp = tmp.transpose((2, 0, 1))
-            sample[elem] = torch.from_numpy(tmp).float()
-
-        return sample
+            return sample
+        except:
+            return
 
     def __str__(self):
         return 'ToTensor'

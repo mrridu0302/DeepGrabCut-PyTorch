@@ -92,6 +92,7 @@ def main():
             pass
         if k == 100: # D
             cv2.imwrite('./' + str(image_idx) + 'out.png', image)
+
         if k == 115:
             global left, right, up, down
             left = 0xFFF
